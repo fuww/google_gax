@@ -33,7 +33,7 @@ defmodule GoogleApi.Gax.Connection do
         )
       )
 
-      plug(Tesla.Middleware.DecompressResponse, [])
+      plug(Tesla.Middleware.DecompressResponse, max_body_size: 32 * 1024 * 1024)
 
       plug(Tesla.Middleware.EncodeJson, engine: Poison)
 
@@ -167,7 +167,7 @@ defmodule GoogleApi.Gax.Connection do
   defp build_body(output, [], file_params) do
     body =
       Enum.reduce(file_params, Tesla.Multipart.new(), fn {file_name, file_path}, b ->
-        Tesla.Multipart.add_file(b, file_path, name: file_name)
+        Tesla.Multipart.add_file(b, file_path, name: to_string(file_name))
       end)
 
     Keyword.put(output, :body, body)
@@ -201,7 +201,7 @@ defmodule GoogleApi.Gax.Connection do
 
     body =
       Enum.reduce(file_params, body, fn {file_name, file_path}, b ->
-        Tesla.Multipart.add_file(b, file_path, name: file_name)
+        Tesla.Multipart.add_file(b, file_path, name: to_string(file_name))
       end)
 
     Keyword.put(output, :body, body)
